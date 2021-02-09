@@ -1359,6 +1359,21 @@ static void encoder_buffer_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buf
          }
          if (buffer->length)
          {
+            // latency testing begin
+            {
+               MMAL_PORT_T* encoderOutputPort=pData->pstate->encoder_component->output[0];
+               
+               MMAL_PARAMETER_INT64_T param;
+               param.hdr.id = MMAL_PARAMETER_SYSTEM_TIME;
+               param.hdr.size = sizeof(param);
+               param.value = -1;
+               mmal_port_parameter_get(encoderOutputPort, &param.hdr);
+               //uint64_t val=buffer->pts;
+               //uint64_t diff=get_microseconds64()-val;
+               int latencyUs=param.value - buffer->pts;
+               printf("latency %d(us)\n",latencyUs);
+            }
+            // latency testing end
             mmal_buffer_header_mem_lock(buffer);
             if(buffer->flags & MMAL_BUFFER_HEADER_FLAG_CODECSIDEINFO)
             {
